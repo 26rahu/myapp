@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class Task {
   final String id;
@@ -123,13 +124,66 @@ class _Home_PageState extends State<Home_Page> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.orange,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Expanded(child: Image.asset('assests/rdplogo.png')),
-            const Text('Daily Planner'),
+            Expanded(child: Image.asset('assests/rdplogo.png', height: 80)),
+            const Text(
+              'Daily Planner',
+              style: TextStyle(
+                fontFamily: 'Caveat',
+                fontSize: 32,
+                color: Colors.white,
+              ),
+            ),
           ],
         ),
       ),
+      body: Column(
+        children: [
+          TableCalendar(
+            calendarFormat: CalendarFormat.month,
+            focusedDay: DateTime.now(),
+            firstDay: DateTime(2025),
+            lastDay: DateTime(2026),
+          ),
+          Consumer<TaskProvider>(
+            builder: (context, taskProvider, child) {
+              return buildAddTaskSection(nameCOntroller, () async {
+                await taskProvider.addTask(nameCOntroller.text);
+                nameCOntroller.clear();
+              });
+            },
+          ),
+        ],
+      ),
+      drawer: Drawer(),
     );
   }
+}
+
+// Build the section for adding tasks
+
+Widget buildAddTaskSection(nameController, addTask) {
+  return Container(
+    decoration: BoxDecoration(color: Colors.white),
+    child: Row(
+      children: [
+        Expanded(
+          child: Container(
+            child: TextField(
+              maxLength: 32,
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: "Add Task",
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+        ),
+        ElevatedButton(onPressed: addTask, child: Text('Add Task')),
+      ],
+    ),
+  );
 }
