@@ -1,9 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/service/taskService.dart';
+import 'package:myapp/models/task.dart';
+import 'package:myapp/providers/task-provider.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:myapp/providers/task-provider.dart';
 
 class Home_Page extends StatefulWidget {
   const Home_Page({super.key});
@@ -27,7 +26,7 @@ class _Home_PageState extends State<Home_Page> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.red,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -45,11 +44,24 @@ class _Home_PageState extends State<Home_Page> {
       ),
       body: Column(
         children: [
-          TableCalendar(
-            calendarFormat: CalendarFormat.month,
-            focusedDay: DateTime.now(),
-            firstDay: DateTime(2025),
-            lastDay: DateTime(2026),
+          Expanded(
+            child: SingleChildScrollView(
+              child: TableCalendar(
+                calendarFormat: CalendarFormat.month,
+                focusedDay: DateTime.now(),
+                firstDay: DateTime(2025),
+                lastDay: DateTime(2026),
+              ),
+            ),
+          ),
+          Consumer<TaskProvider>(
+            builder: (context, taskProvider, child) {
+              return buildTaksItem(
+                taskProvider.tasks,
+                taskProvider.removeTask,
+                taskProvider.updateTask,
+              );
+            },
           ),
           Consumer<TaskProvider>(
             builder: (context, taskProvider, child) {
@@ -88,5 +100,54 @@ Widget buildAddTaskSection(nameController, addTask) {
         ElevatedButton(onPressed: addTask, child: Text('Add Task')),
       ],
     ),
+  );
+}
+
+Widget buildTaksItem(
+  List<Task> tasks,
+  Function(int) removeTasks,
+  Function(int, bool) updateTask,
+) {
+  return ListView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    itemCount: tasks.length,
+    itemBuilder: (context, index) {
+      final task = tasks[index];
+      final isEven = index % 2 == 0;
+
+      return Padding(
+        padding: const EdgeInsets.all(1.0),
+        child: ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          tileColor: isEven ? Colors.blue : Colors.green,
+          leading: Icon(
+            task.completed ? Icons.check_circle : Icons.circle_outlined,
+          ),
+          title: Text(
+            task.name,
+            style: TextStyle(
+              decoration: task.completed ? TextDecoration.lineThrough : null,
+              fontSize: 22,
+            ),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Checkbox(
+                value: task.completed,
+                onChanged: (value) => {updateTask(index, value!)},
+              ),
+              IconButton(
+                onPressed: () => removeTasks(index),
+                icon: Icon(Icons.delete),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
   );
 }
