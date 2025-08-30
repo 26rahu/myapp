@@ -6,11 +6,13 @@ import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); // make flutter ready before start
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ); // start firebase magic stuff
 
-  runApp(const MyApp());
+  runApp(const MyApp()); // run my cool app
 }
 
 class MyApp extends StatelessWidget {
@@ -19,8 +21,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => TaskProvider(),
-      child: const MaterialApp(home: Home_Page()),
+      create: (context) => TaskProvider(), // this give tasks to everyone in app
+      child: const MaterialApp(home: Home_Page()), // show home page first
     );
   }
 }
